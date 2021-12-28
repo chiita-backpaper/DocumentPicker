@@ -8,19 +8,26 @@
 import SwiftUI
 
 struct ContentView: View {
-    @State private var fileContent = ""
+    @State private var fileName = ""
     @State private var showDocumentPicker = false
     
     var body: some View {
-        VStack {
-            Text(fileContent).padding()
-            
-            Button("Import file") {
-                showDocumentPicker = true
+        VStack(spacing: 25) {
+            Text(fileName).fontWeight(.bold)
+            Button(action:{showDocumentPicker.toggle()}){
+                Text("Open")
             }
         }
-        .sheet(isPresented: self.$showDocumentPicker) {
-            DocumentPicker(fileContent : $fileContent)
+        .fileImporter(isPresented: $showDocumentPicker, allowedContentTypes: [.text]) { (res) in
+            do {
+                let fileUrl = try res.get()
+                print(fileUrl)
+                self.fileName = fileUrl.lastPathComponent
+            }
+            catch {
+                print("error reading files")
+                print(error.localizedDescription)
+            }
         }
     }
 }
