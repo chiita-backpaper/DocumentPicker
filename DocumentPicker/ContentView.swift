@@ -5,20 +5,29 @@
 //  Created by Taichi Uragami on 2021/12/28.
 //
 
+// https://www.youtube.com/watch?v=tnOVnwbkAA0&t=38s
+
 import SwiftUI
+import UniformTypeIdentifiers
 
 struct ContentView: View {
     @State private var fileName = ""
-    @State private var showDocumentPicker = false
+    @State private var openFile = false
+    @State private var saveFile = false
+    
+    let saveFilePath = Bundle.main.path(forResource: "sample", ofType: "csv")
     
     var body: some View {
         VStack(spacing: 25) {
             Text(fileName).fontWeight(.bold)
-            Button(action:{showDocumentPicker.toggle()}){
+            Button(action:{openFile.toggle()}){
                 Text("Open")
             }
+            Button(action:{saveFile.toggle()}){
+                Text("Save")
+            }
         }
-        .fileImporter(isPresented: $showDocumentPicker, allowedContentTypes: [.text]) { (res) in
+        .fileImporter(isPresented: $openFile, allowedContentTypes: [.text]) { (res) in
             do {
                 let fileUrl = try res.get()
                 print(fileUrl)
@@ -29,6 +38,36 @@ struct ContentView: View {
                 print(error.localizedDescription)
             }
         }
+        
+        .fileExporter(isPresented: $saveFile, document: Doc(url: saveFilePath ?? ""), contentType: .image) { (res) in do {
+                let fileUrl =  try res.get()
+                print(fileUrl)
+            }
+            catch {
+                print("cant save image")
+                print(saveFilePath)
+                print(error.localizedDescription)
+            }
+            
+        }
+    }
+}
+
+struct Doc: FileDocument {
+    var url: String
+    static var readableContentTypes: [UTType]{[.image]}
+    
+    init(url: String) {
+        self.url = url
+    }
+    
+    init(configuration: ReadConfiguration) throws {
+        url = ""
+    }
+    
+    func fileWrapper(configuration: WriteConfiguration) throws -> FileWrapper {
+        let file = try! FileWrapper(url: URL(fileURLWithPath: url), options: .immediate)
+        return file
     }
 }
 
