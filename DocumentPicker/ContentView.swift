@@ -45,7 +45,7 @@ struct ContentView: View {
             }
             catch {
                 print("cant save image")
-                print(saveFilePath)
+                print(saveFilePath ?? "nil")
                 print(error.localizedDescription)
             }
             
