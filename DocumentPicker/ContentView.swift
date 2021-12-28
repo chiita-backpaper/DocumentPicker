@@ -8,9 +8,20 @@
 import SwiftUI
 
 struct ContentView: View {
+    @State private var fileContent = ""
+    @State private var showDocumentPicker = false
+    
     var body: some View {
-        Text("Hello, world!")
-            .padding()
+        VStack {
+            Text(fileContent).padding()
+            
+            Button("Import file") {
+                showDocumentPicker = true
+            }
+        }
+        .sheet(isPresented: self.$showDocumentPicker) {
+            DocumentPicker(fileContent : $fileContent)
+        }
     }
 }
 
