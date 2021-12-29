@@ -8,6 +8,7 @@
 // https://www.youtube.com/watch?v=tnOVnwbkAA0&t=38s
 
 import SwiftUI
+import Foundation
 import UniformTypeIdentifiers
 
 struct ContentView: View {
@@ -27,11 +28,18 @@ struct ContentView: View {
                 Text("Save")
             }
         }
-        .fileImporter(isPresented: $openFile, allowedContentTypes: [.text]) { (res) in
+        .fileImporter(isPresented: $openFile, allowedContentTypes: [.commaSeparatedText]) { (res) in
             do {
                 let fileUrl = try res.get()
-                print(fileUrl)
                 self.fileName = fileUrl.lastPathComponent
+                
+                if fileUrl.startAccessingSecurityScopedResource() {
+                    defer {fileUrl.stopAccessingSecurityScopedResource()}
+                    LoadCSV(url: fileUrl)
+                    
+                } else {
+                    print("Couldn't accces file")
+                }
             }
             catch {
                 print("error reading files")
@@ -39,7 +47,7 @@ struct ContentView: View {
             }
         }
         
-        .fileExporter(isPresented: $saveFile, document: Doc(url: saveFilePath ?? ""), contentType: .image) { (res) in do {
+        .fileExporter(isPresented: $saveFile, document: Doc(url: saveFilePath ?? ""), contentType: .content) { (res) in do {
                 let fileUrl =  try res.get()
                 print(fileUrl)
             }
@@ -55,7 +63,7 @@ struct ContentView: View {
 
 struct Doc: FileDocument {
     var url: String
-    static var readableContentTypes: [UTType]{[.image]}
+    static var readableContentTypes: [UTType]{[.commaSeparatedText]}
     
     init(url: String) {
         self.url = url
